@@ -351,6 +351,7 @@ func (m *ExpirationManager) Tidy(ctx context.Context) error {
 		}
 	}
 
+	// TODO: Enumerate namespaces instead of using current
 	ns, err := namespace.FromContext(ctx)
 	if err != nil {
 		return err
