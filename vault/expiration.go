@@ -1483,23 +1483,21 @@ func (m *ExpirationManager) loadEntryInternal(ctx context.Context, leaseID strin
 	}
 	le.namespace = ns
 
-	if restoreMode {
-		if checkRestored {
-			// If we have already loaded this lease, we don't need to update on
-			// load. In the case of renewal and revocation, updatePending will be
-			// done after making the appropriate modifications to the lease.
-			if _, ok := m.restoreLoaded.Load(leaseID); ok {
-				return le, nil
-			}
-		}
+	// We don't need these anymore, but don't want to change the function signature
+	restoreMode = true
+	checkRestored = true
 
-		// Update the cache of restored leases, either synchronously or through
-		// the lazy loaded restore process
-		m.restoreLoaded.Store(le.LeaseID, struct{}{})
-
-		// Setup revocation timer
-		m.updatePending(le, le.ExpireTime.Sub(time.Now()))
+	// Check if lease is loaded
+	if _, ok := m.restoreLoaded.Load(leaseID); ok {
+		return le, nil
 	}
+
+	// Restore the lease from storage
+	m.restoreLoaded.Store(le.LeaseID, struct{}{})
+
+	// Setup revocation timer
+	m.updatePending(le, le.ExpireTime.Sub(time.Now()))
+
 	return le, nil
 }
 
