@@ -164,7 +164,9 @@ func NewExpirationManager(c *Core, view *BarrierView, e ExpireLeaseStrategy, log
 		logLeaseExpirations: os.Getenv("VAULT_SKIP_LOGGING_LEASE_EXPIRATIONS") == "",
 		expireFunc:          e,
 	}
-	*exp.restoreMode = 1
+
+	// Don't start in restore mode, we we lazily load leases from storage
+	*exp.restoreMode = 0
 
 	if exp.logger == nil {
 		opts := log.LoggerOptions{Name: "expiration_manager"}
