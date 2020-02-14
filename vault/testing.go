@@ -1403,6 +1403,12 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 			coreConfig.HAPhysical = base.HAPhysical
 		}
 
+		if base.RawConfig.DisableClustering {
+			coreConfig.RedirectAddr = ""
+			coreConfig.ClusterAddr = ""
+			coreConfig.HAPhysical = nil
+		}
+
 		// Used to set something non-working to test fallback
 		switch base.ClusterAddr {
 		case "empty":
@@ -1455,12 +1461,14 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 			t.Fatal(err)
 		}
 	}
-	if coreConfig.HAPhysical == nil && (opts == nil || opts.PhysicalFactory == nil) {
-		haPhys, err := physInmem.NewInmemHA(nil, testCluster.Logger)
-		if err != nil {
-			t.Fatal(err)
+	if !base.RawConfig.DisableClustering {
+		if coreConfig.HAPhysical == nil && (opts == nil || opts.PhysicalFactory == nil) {
+			haPhys, err := physInmem.NewInmemHA(nil, testCluster.Logger)
+			if err != nil {
+				t.Fatal(err)
+			}
+			coreConfig.HAPhysical = haPhys.(physical.HABackend)
 		}
-		coreConfig.HAPhysical = haPhys.(physical.HABackend)
 	}
 
 	pubKey, priKey, err := testGenerateCoreKeys()
@@ -1473,7 +1481,9 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 	coreConfigs := []*CoreConfig{}
 	for i := 0; i < numCores; i++ {
 		localConfig := *coreConfig
-		localConfig.RedirectAddr = fmt.Sprintf("https://127.0.0.1:%d", listeners[i][0].Address.Port)
+		if !localConfig.RawConfig.DisableClustering {
+			localConfig.RedirectAddr = fmt.Sprintf("https://127.0.0.1:%d", listeners[i][0].Address.Port)
+		}
 
 		// if opts.SealFunc is provided, use that to generate a seal for the config instead
 		if opts != nil && opts.SealFunc != nil {
@@ -1494,22 +1504,26 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 				coreConfig.Physical = physBundle.Backend
 				localConfig.Physical = physBundle.Backend
 				base.Physical = physBundle.Backend
-				haBackend := physBundle.HABackend
-				if haBackend == nil {
-					if ha, ok := physBundle.Backend.(physical.HABackend); ok {
-						haBackend = ha
+				if !base.RawConfig.DisableClustering {
+					haBackend := physBundle.HABackend
+					if haBackend == nil {
+						if ha, ok := physBundle.Backend.(physical.HABackend); ok {
+							haBackend = ha
+						}
 					}
+					coreConfig.HAPhysical = haBackend
+					localConfig.HAPhysical = haBackend
 				}
-				coreConfig.HAPhysical = haBackend
-				localConfig.HAPhysical = haBackend
 				if physBundle.Cleanup != nil {
 					cleanupFuncs = append(cleanupFuncs, physBundle.Cleanup)
 				}
 			}
 		}
 
-		if opts != nil && opts.ClusterLayers != nil {
-			localConfig.ClusterNetworkLayer = opts.ClusterLayers.Layers()[i]
+		if !localConfig.RawConfig.DisableClustering {
+			if opts != nil && opts.ClusterLayers != nil {
+				localConfig.ClusterNetworkLayer = opts.ClusterLayers.Layers()[i]
+			}
 		}
 
 		switch {
@@ -1680,13 +1694,15 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 
 			// Ensure cluster connection info is populated.
 			// Other cores should not come up as leaders.
-			for i := 1; i < numCores; i++ {
-				isLeader, _, _, err := cores[i].Leader()
-				if err != nil {
-					t.Fatal(err)
-				}
-				if isLeader {
-					t.Fatalf("core[%d] should not be leader", i)
+			if !base.RawConfig.DisableClustering {
+				for i := 1; i < numCores; i++ {
+					isLeader, _, _, err := cores[i].Leader()
+					if err != nil {
+						t.Fatal(err)
+					}
+					if isLeader {
+						t.Fatalf("core[%d] should not be leader", i)
+					}
 				}
 			}
 		}
