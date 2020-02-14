@@ -10,17 +10,20 @@ func TestGetTestCluster(t *testing.T) {
 	type args struct {
 	}
 	tests := []struct {
-		name    string
-		servers int
+		name        string
+		clusterSize int
 	}{
 		{
-			name:    "get three mysql backed servers",
-			servers: 3,
+			name:        "active-active HA cluster",
+			clusterSize: ClusterSize,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cluster := getTestCluster(t, tt.servers)
+			cluster := GetTestCluster(t, tt.clusterSize)
+			if cluster == nil {
+				t.Fatal("failed to get test cluster (can it connect to storage?)")
+			}
 			cluster.Start()
 
 			for _, core := range cluster.Cores {
