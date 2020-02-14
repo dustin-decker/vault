@@ -554,6 +554,9 @@ type CoreConfig struct {
 	// Disables mlock syscall
 	DisableMlock bool
 
+	// Custom TTL for the LRU caches, or zero for default
+	CacheTTL time.Duration
+
 	// Custom cache size for the LRU cache on the physical backend, or zero for default
 	CacheSize int
 
@@ -619,6 +622,7 @@ func (c *CoreConfig) Clone() *CoreConfig {
 		Logger:                    c.Logger,
 		DisableCache:              c.DisableCache,
 		DisableMlock:              c.DisableMlock,
+		CacheTTL:                  c.CacheTTL,
 		CacheSize:                 c.CacheSize,
 		StorageType:               c.StorageType,
 		RedirectAddr:              c.RedirectAddr,

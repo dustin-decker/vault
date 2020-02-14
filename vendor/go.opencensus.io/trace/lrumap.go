@@ -15,7 +15,7 @@
 package trace
 
 import (
-	"github.com/hashicorp/golang-lru/simplelru"
+	"github.com/dustin-decker/golang-lru/simplelru"
 )
 
 type lruMap struct {

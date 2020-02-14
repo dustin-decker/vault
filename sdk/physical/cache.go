@@ -3,9 +3,11 @@ package physical
 import (
 	"context"
 	"sync/atomic"
+	"time"
 
+	lru "github.com/dustin-decker/golang-lru"
+	"github.com/dustin-decker/golang-lru/simplelru"
 	log "github.com/hashicorp/go-hclog"
-	lru "github.com/hashicorp/golang-lru"
 	"github.com/hashicorp/vault/sdk/helper/locksutil"
 	"github.com/hashicorp/vault/sdk/helper/pathmanager"
 )
@@ -52,7 +54,7 @@ func cacheRefreshFromContext(ctx context.Context) bool {
 // by using a simple write-through cache.
 type Cache struct {
 	backend         Backend
-	lru             *lru.TwoQueueCache
+	lru             simplelru.LRUCache
 	locks           []*locksutil.LockEntry
 	logger          log.Logger
 	enabled         *uint32
@@ -73,9 +75,9 @@ var _ Transactional = (*TransactionalCache)(nil)
 
 // NewCache returns a physical cache of the given size.
 // If no size is provided, the default size is used.
-func NewCache(b Backend, size int, logger log.Logger) *Cache {
+func NewCache(b Backend, size int, ttl time.Duration, logger log.Logger) *Cache {
 	if logger.IsDebug() {
-		logger.Debug("creating LRU cache", "size", size)
+		logger.Debug("creating LRU cache", "size", size, "ttl", ttl)
 	}
 	if size <= 0 {
 		size = DefaultCacheSize
@@ -84,7 +86,7 @@ func NewCache(b Backend, size int, logger log.Logger) *Cache {
 	pm := pathmanager.New()
 	pm.AddPaths(cacheExceptionsPaths)
 
-	cache, _ := lru.New2Q(size)
+	cache, _ := lru.NewTTL(size, ttl)
 	c := &Cache{
 		backend: b,
 		lru:     cache,
@@ -97,9 +99,9 @@ func NewCache(b Backend, size int, logger log.Logger) *Cache {
 	return c
 }
 
-func NewTransactionalCache(b Backend, size int, logger log.Logger) *TransactionalCache {
+func NewTransactionalCache(b Backend, size int, ttl time.Duration, logger log.Logger) *TransactionalCache {
 	c := &TransactionalCache{
-		Cache:         NewCache(b, size, logger),
+		Cache:         NewCache(b, size, ttl, logger),
 		Transactional: b.(Transactional),
 	}
 	return c
@@ -208,7 +210,7 @@ func (c *TransactionalCache) Locks() []*locksutil.LockEntry {
 	return c.locks
 }
 
-func (c *TransactionalCache) LRU() *lru.TwoQueueCache {
+func (c *TransactionalCache) LRU() simplelru.LRUCache {
 	return c.lru
 }
 

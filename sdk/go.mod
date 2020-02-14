@@ -6,6 +6,7 @@ require (
 	github.com/armon/go-metrics v0.3.0
 	github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310
 	github.com/aws/aws-sdk-go v1.25.37
+	github.com/dustin-decker/golang-lru v0.5.5-0.20200214174043-7019a3d9f547
 	github.com/fatih/structs v1.1.0
 	github.com/go-ldap/ldap/v3 v3.1.3
 	github.com/go-test/deep v1.0.2-0.20181118220953-042da051cf31
@@ -20,7 +21,6 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.2
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.1.0
-	github.com/hashicorp/golang-lru v0.5.1
 	github.com/hashicorp/hcl v1.0.0
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/go-testing-interface v1.0.0

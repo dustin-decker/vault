@@ -3,6 +3,7 @@ package active
 import (
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/vault/command/server"
 	vaulthttp "github.com/hashicorp/vault/http"
@@ -52,6 +53,7 @@ func GetTestCluster(t testing.T, cluserSize int) *vault.TestCluster {
 		RawConfig: &server.Config{
 			DisableMlock:      true,
 			DisableClustering: true,
+			CacheTTL:          time.Second * 3,
 			Storage: &server.Storage{
 				Type:              "mysql",
 				DisableClustering: true,

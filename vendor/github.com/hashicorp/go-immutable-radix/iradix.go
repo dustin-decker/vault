@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/hashicorp/golang-lru/simplelru"
+	"github.com/dustin-decker/golang-lru/simplelru"
 )
 
 const (

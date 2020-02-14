@@ -69,6 +69,9 @@ func TestServiceTokens(t *testing.T) {
 				}
 			}
 
+			// sleep to wait for LRU TTL
+			time.Sleep(5)
+
 			// lookup all service tokens on all servers to check renewal
 			for _, core := range cluster.Cores {
 				client := core.Client
@@ -95,6 +98,9 @@ func TestServiceTokens(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
+
+			// sleep to wait for LRU TTL
+			time.Sleep(5)
 
 			// lookup revoked service tokens with all servers
 			for _, core := range cluster.Cores {
