@@ -1,6 +1,6 @@
 package keysutil
 
-import lru "github.com/hashicorp/golang-lru"
+import lru "github.com/dustin-decker/golang-lru"
 
 type TransitLRU struct {
 	size int

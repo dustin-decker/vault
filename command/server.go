@@ -1100,6 +1100,7 @@ func (c *ServerCommand) Run(args []string) int {
 		MaxLeaseTTL:               config.MaxLeaseTTL,
 		DefaultLeaseTTL:           config.DefaultLeaseTTL,
 		ClusterName:               config.ClusterName,
+		CacheTTL:                  config.CacheTTL,
 		CacheSize:                 config.CacheSize,
 		PluginDirectory:           config.PluginDirectory,
 		EnableUI:                  config.EnableUI,

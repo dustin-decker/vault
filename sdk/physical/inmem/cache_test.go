@@ -3,6 +3,7 @@ package inmem
 import (
 	"context"
 	"testing"
+	"time"
 
 	log "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/sdk/helper/logging"
@@ -16,7 +17,7 @@ func TestCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache := physical.NewCache(inm, 0, logger)
+	cache := physical.NewCache(inm, 0, time.Second, logger)
 	cache.SetEnabled(true)
 	physical.ExerciseBackend(t, cache)
 	physical.ExerciseBackend_ListPrefix(t, cache)
@@ -29,7 +30,7 @@ func TestCache_Purge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache := physical.NewCache(inm, 0, logger)
+	cache := physical.NewCache(inm, 0, time.Second, logger)
 	cache.SetEnabled(true)
 
 	ent := &physical.Entry{
@@ -76,7 +77,7 @@ func TestCache_Disable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache := physical.NewCache(inm, 0, logger)
+	cache := physical.NewCache(inm, 0, time.Second, logger)
 
 	disabledTests := func() {
 		ent := &physical.Entry{
@@ -276,7 +277,7 @@ func TestCache_Refresh(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache := physical.NewCache(inm, 0, logger)
+	cache := physical.NewCache(inm, 0, time.Second, logger)
 	cache.SetEnabled(true)
 
 	ent := &physical.Entry{

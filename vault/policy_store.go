@@ -9,9 +9,9 @@ import (
 	"time"
 
 	metrics "github.com/armon/go-metrics"
+	lru "github.com/dustin-decker/golang-lru"
 	"github.com/hashicorp/errwrap"
 	log "github.com/hashicorp/go-hclog"
-	lru "github.com/hashicorp/golang-lru"
 	"github.com/hashicorp/vault/helper/identity"
 	"github.com/hashicorp/vault/helper/namespace"
 	"github.com/hashicorp/vault/sdk/helper/consts"
