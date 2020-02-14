@@ -1,0 +1,21 @@
+name: Vault active-active HA conformance testing
+
+on: [push]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test:
+          - TestGetTestCluster
+          # - TestServiceTokens
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-go@v2-beta
+        with:
+          go-version: '^1.13.8'
+      - run: |
+          go test -timeout 5m github.com/hashicorp/vault/active -count=1 -run "^(${TEST})$"
+        env:
+          TEST: ${{ matrix.test }}
