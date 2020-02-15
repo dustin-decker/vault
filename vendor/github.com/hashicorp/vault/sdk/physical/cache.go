@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	// DefaultCacheTTL is used if no cache TTL is specified for NewCache
-	DefaultCacheTTL = time.Hour * 24
+	// DefaultCacheTTL is used if no ttl is specified for NewCache
+	DefaultCacheTTL = time.Hour * 8
 
 	// DefaultCacheSize is used if no cache size is specified for NewCache
 	DefaultCacheSize = 128 * 1024
@@ -79,15 +79,17 @@ var _ Transactional = (*TransactionalCache)(nil)
 // NewCache returns a physical cache of the given size.
 // If no size is provided, the default size is used.
 func NewCache(b Backend, size int, ttl time.Duration, logger log.Logger) *Cache {
-	if logger.IsDebug() {
-		logger.Debug("creating LRU cache", "size", size)
-	}
+
 	if size <= 0 {
 		size = DefaultCacheSize
 	}
 
 	if ttl <= 0 {
 		ttl = DefaultCacheTTL
+	}
+
+	if logger.IsDebug() {
+		logger.Debug("creating LRU cache", "size", size, "ttl", ttl)
 	}
 
 	pm := pathmanager.New()
@@ -106,9 +108,9 @@ func NewCache(b Backend, size int, ttl time.Duration, logger log.Logger) *Cache 
 	return c
 }
 
-func NewTransactionalCache(b Backend, size int, logger log.Logger) *TransactionalCache {
+func NewTransactionalCache(b Backend, size int, ttl time.Duration, logger log.Logger) *TransactionalCache {
 	c := &TransactionalCache{
-		Cache:         NewCache(b, size, logger),
+		Cache:         NewCache(b, size, ttl, logger),
 		Transactional: b.(Transactional),
 	}
 	return c
