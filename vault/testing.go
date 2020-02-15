@@ -1445,15 +1445,17 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 		coreConfig.RawConfig = new(server.Config)
 	}
 
-	if base.RawConfig != nil {
-		if base.RawConfig.DisableClustering {
-			coreConfig.RedirectAddr = ""
-			coreConfig.ClusterAddr = ""
-			coreConfig.HAPhysical = nil
-		}
+	if base != nil {
+		if base.RawConfig != nil {
+			if base.RawConfig.DisableClustering {
+				coreConfig.RedirectAddr = ""
+				coreConfig.ClusterAddr = ""
+				coreConfig.HAPhysical = nil
+			}
 
-		if base.RawConfig.CacheTTL > 0 {
-			coreConfig.CacheTTL = base.RawConfig.CacheTTL
+			if base.RawConfig.CacheTTL > 0 {
+				coreConfig.CacheTTL = base.RawConfig.CacheTTL
+			}
 		}
 	}
 
@@ -1468,13 +1470,17 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 			t.Fatal(err)
 		}
 	}
-	if !base.RawConfig.DisableClustering {
-		if coreConfig.HAPhysical == nil && (opts == nil || opts.PhysicalFactory == nil) {
-			haPhys, err := physInmem.NewInmemHA(nil, testCluster.Logger)
-			if err != nil {
-				t.Fatal(err)
-			}
-			coreConfig.HAPhysical = haPhys.(physical.HABackend)
+	if coreConfig.HAPhysical == nil && (opts == nil || opts.PhysicalFactory == nil) {
+		haPhys, err := physInmem.NewInmemHA(nil, testCluster.Logger)
+		if err != nil {
+			t.Fatal(err)
+		}
+		coreConfig.HAPhysical = haPhys.(physical.HABackend)
+	}
+
+	if base != nil && base.RawConfig != nil {
+		if base.RawConfig.DisableClustering {
+			coreConfig.HAPhysical = nil
 		}
 	}
 
@@ -1701,7 +1707,12 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 
 			// Ensure cluster connection info is populated.
 			// Other cores should not come up as leaders.
-			if !base.RawConfig.DisableClustering {
+			enableLeaderCheck := true
+			if base != nil && base.RawConfig != nil && base.RawConfig.DisableClustering {
+				enableLeaderCheck = false
+			}
+
+			if enableLeaderCheck {
 				for i := 1; i < numCores; i++ {
 					isLeader, _, _, err := cores[i].Leader()
 					if err != nil {
