@@ -1404,12 +1404,6 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 			coreConfig.HAPhysical = base.HAPhysical
 		}
 
-		if base.RawConfig.DisableClustering {
-			coreConfig.RedirectAddr = ""
-			coreConfig.ClusterAddr = ""
-			coreConfig.HAPhysical = nil
-		}
-
 		// Used to set something non-working to test fallback
 		switch base.ClusterAddr {
 		case "empty":
@@ -1449,6 +1443,18 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 
 	if coreConfig.RawConfig == nil {
 		coreConfig.RawConfig = new(server.Config)
+	}
+
+	if base.RawConfig != nil {
+		if base.RawConfig.DisableClustering {
+			coreConfig.RedirectAddr = ""
+			coreConfig.ClusterAddr = ""
+			coreConfig.HAPhysical = nil
+		}
+
+		if base.RawConfig.CacheTTL > 0 {
+			coreConfig.CacheTTL = base.RawConfig.CacheTTL
+		}
 	}
 
 	addAuditBackend := len(coreConfig.AuditBackends) == 0

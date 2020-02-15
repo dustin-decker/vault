@@ -14,10 +14,17 @@ func TestServiceTokens(t *testing.T) {
 	tests := []struct {
 		name        string
 		clusterSize int
+		tokens      int
 	}{
 		{
+			name:        "single node",
+			clusterSize: 1,
+			tokens:      10,
+		},
+		{
 			name:        "active-active HA cluster",
-			clusterSize: ClusterSize,
+			clusterSize: 3,
+			tokens:      300,
 		},
 	}
 	for _, tt := range tests {
@@ -30,14 +37,14 @@ func TestServiceTokens(t *testing.T) {
 
 			var secrets = []*api.Secret{}
 
-			// create 1000 child service tokens split among all server clients
-			for i := 0; i < 1000; i++ {
+			// create child service tokens split among all server clients
+			for i := 0; i < tt.tokens; i++ {
 				client := cluster.Cores[i%len(cluster.Cores)].Client
 				dumbTrueBoolForPointer := true
 				secret, err := client.Auth().Token().Create(&api.TokenCreateRequest{
 					DisplayName:    fmt.Sprintf("token-%d", i),
-					TTL:            "1800",
-					ExplicitMaxTTL: "36000",
+					TTL:            "1800s",
+					ExplicitMaxTTL: "36000s",
 					Renewable:      &dumbTrueBoolForPointer,
 				})
 				if err != nil {
@@ -69,8 +76,8 @@ func TestServiceTokens(t *testing.T) {
 				}
 			}
 
-			// sleep to wait for LRU TTL
-			time.Sleep(5)
+			// sleep to wait for TTL
+			time.Sleep(time.Millisecond * 1)
 
 			// lookup all service tokens on all servers to check renewal
 			for _, core := range cluster.Cores {
@@ -84,8 +91,8 @@ func TestServiceTokens(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					if ttl < time.Second*10000 {
-						t.Fatal("token does not look renewed from this server")
+					if ttl < time.Second*1800 {
+						t.Fatalf("token does not look renewed from this server, got %s", ttl)
 					}
 				}
 			}
@@ -99,8 +106,8 @@ func TestServiceTokens(t *testing.T) {
 				}
 			}
 
-			// sleep to wait for LRU TTL
-			time.Sleep(5)
+			// sleep to wait for TTL
+			time.Sleep(time.Millisecond)
 
 			// lookup revoked service tokens with all servers
 			for _, core := range cluster.Cores {

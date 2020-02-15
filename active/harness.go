@@ -18,7 +18,6 @@ var (
 		"address":  GetEnvStr("DATABASE_ADDR", "127.0.0.1:3306"),
 		"username": GetEnvStr("DATABASE_USERNAME", "root"),
 		"password": GetEnvStr("DATABASE_PASSWORD", "root"),
-		"database": GetEnvStr("DATABASE_NAME", "vault"),
 	}
 
 	ClusterSize = GetEnvInt("CLUSTER_SIZE", 3)
@@ -45,6 +44,8 @@ func GetEnvInt(key string, fallback int) int {
 }
 
 func GetTestCluster(t testing.T, cluserSize int) *vault.TestCluster {
+	// Use a new database for each run
+	StorageConf["database"] = time.Now().String()
 	phys, err := physMySQL.NewMySQLBackend(StorageConf, nil)
 	if err != nil {
 		return nil
@@ -53,7 +54,7 @@ func GetTestCluster(t testing.T, cluserSize int) *vault.TestCluster {
 		RawConfig: &server.Config{
 			DisableMlock:      true,
 			DisableClustering: true,
-			CacheTTL:          time.Second * 3,
+			CacheTTL:          time.Microsecond,
 			Storage: &server.Storage{
 				Type:              "mysql",
 				DisableClustering: true,
