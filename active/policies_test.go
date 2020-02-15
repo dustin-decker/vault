@@ -16,15 +16,15 @@ func TestPolicies(t *testing.T) {
 		clusterSize int
 		iterations  int
 	}{
-		// {
-		// 	name:        "single node",
-		// 	clusterSize: 1,
-		// 	iterations:  10,
-		// },
+		{
+			name:        "single node",
+			clusterSize: 1,
+			iterations:  10,
+		},
 		{
 			name:        "active-active HA cluster",
 			clusterSize: 3,
-			iterations:  10,
+			iterations:  100,
 		},
 	}
 	for _, tt := range tests {
