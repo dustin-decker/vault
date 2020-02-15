@@ -11,6 +11,7 @@ jobs:
         test:
           - TestGetTestCluster
           - TestServiceTokens
+          - TestBatchTokens
           - TestPolicies
     steps:
       - uses: actions/checkout@v1
