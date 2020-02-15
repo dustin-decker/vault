@@ -2,6 +2,7 @@ package active
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func TestServiceTokens(t *testing.T) {
 
 			// create child service tokens split among all server clients
 			for i := 0; i < tt.tokens; i++ {
-				client := cluster.Cores[i%len(cluster.Cores)].Client
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
 				dumbTrueBoolForPointer := true
 				secret, err := client.Auth().Token().Create(&api.TokenCreateRequest{
 					DisplayName:    fmt.Sprintf("token-%d", i),
@@ -68,8 +69,8 @@ func TestServiceTokens(t *testing.T) {
 			}
 
 			// renew all service tokens split among all servers
-			for i, secret := range secrets {
-				client := cluster.Cores[(i+1)%len(cluster.Cores)].Client
+			for _, secret := range secrets {
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
 				_, err := client.Auth().Token().Renew(secret.Auth.ClientToken, 20000)
 				if err != nil {
 					t.Fatal(err)
@@ -98,8 +99,8 @@ func TestServiceTokens(t *testing.T) {
 			}
 
 			// revoke child service tokens split among all server clients
-			for i, secret := range secrets {
-				client := cluster.Cores[(i+2)%len(cluster.Cores)].Client
+			for _, secret := range secrets {
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
 				err := client.Auth().Token().RevokeTree(secret.Auth.ClientToken)
 				if err != nil {
 					t.Fatal(err)
@@ -117,6 +118,30 @@ func TestServiceTokens(t *testing.T) {
 					if err == nil {
 						t.Fatal("token should be revoked")
 					}
+				}
+			}
+
+			// create short lived service tokens
+			secrets = []*api.Secret{}
+			for i := 0; i < tt.tokens; i++ {
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
+				secret, err := client.Auth().Token().Create(&api.TokenCreateRequest{
+					DisplayName: "token",
+					TTL:         "1s",
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				secrets = append(secrets, secret)
+			}
+			// wait for tokens to expire
+			time.Sleep(time.Millisecond * 1100)
+			for _, secret := range secrets {
+				// expect token to be expired
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
+				_, err := client.Auth().Token().Lookup(secret.Auth.ClientToken)
+				if err == nil {
+					t.Fatal("expected token lookup on expired service token to fail")
 				}
 			}
 		})
