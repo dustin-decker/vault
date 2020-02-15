@@ -56,6 +56,7 @@ const (
 type pendingInfo struct {
 	exportLeaseTimes *leaseEntry
 	timer            *time.Timer
+	creationTime     time.Time
 }
 
 // ExpirationManager is used by the Core to manage leases. Secrets
@@ -70,6 +71,7 @@ type ExpirationManager struct {
 	tokenStore *TokenStore
 	logger     log.Logger
 
+	// This is a lease cache for used for expiration manager
 	pending     map[string]pendingInfo
 	pendingLock sync.RWMutex
 
@@ -1272,12 +1274,16 @@ func (m *ExpirationManager) FetchLeaseTimesByToken(ctx context.Context, te *logi
 func (m *ExpirationManager) FetchLeaseTimes(ctx context.Context, leaseID string) (*leaseEntry, error) {
 	defer metrics.MeasureSince([]string{"expire", "fetch-lease-times"}, time.Now())
 
+	// Check against pending lease cache
 	m.pendingLock.RLock()
 	val := m.pending[leaseID]
 	m.pendingLock.RUnlock()
 
 	if val.exportLeaseTimes != nil {
-		return val.exportLeaseTimes, nil
+		// Only return from pending lease cache if more recent than cacheTTL
+		if time.Since(val.creationTime) < m.core.cacheTTL {
+			return val.exportLeaseTimes, nil
+		}
 	}
 
 	// Load the entry
@@ -1347,6 +1353,8 @@ func (m *ExpirationManager) updatePendingInternal(le *leaseEntry, leaseTotal tim
 		})
 		pending = pendingInfo{
 			timer: timer,
+			// Add creation time to use for cacheTTL expiration
+			creationTime: time.Now(),
 		}
 	}
 
@@ -1488,20 +1496,23 @@ func (m *ExpirationManager) loadEntryInternal(ctx context.Context, leaseID strin
 	}
 	le.namespace = ns
 
-	// We don't need these anymore, but don't want to change the function signature
-	restoreMode = true
-	checkRestored = true
+	if restoreMode {
+		if checkRestored {
+			// If we have already loaded this lease, we don't need to update on
+			// load. In the case of renewal and revocation, updatePending will be
+			// done after making the appropriate modifications to the lease.
+			if _, ok := m.restoreLoaded.Load(leaseID); ok {
+				return le, nil
+			}
+		}
 
-	// Check if lease is loaded
-	if _, ok := m.restoreLoaded.Load(leaseID); ok {
-		return le, nil
+		// Update the cache of restored leases, either synchronously or through
+		// the lazy loaded restore process
+		m.restoreLoaded.Store(le.LeaseID, struct{}{})
+
+		// Setup revocation timer
+		m.updatePending(le, le.ExpireTime.Sub(time.Now()))
 	}
-
-	// Restore the lease from storage
-	m.restoreLoaded.Store(le.LeaseID, struct{}{})
-
-	// Setup revocation timer
-	m.updatePending(le, le.ExpireTime.Sub(time.Now()))
 
 	return le, nil
 }

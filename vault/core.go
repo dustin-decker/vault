@@ -358,6 +358,8 @@ type Core struct {
 	baseLogger log.Logger
 	logger     log.Logger
 
+	cacheTTL time.Duration
+
 	// cachingDisabled indicates whether caches are disabled
 	cachingDisabled bool
 	// Cache stores the actual cache; we always have this but may bypass it if
@@ -738,6 +740,7 @@ func NewCore(conf *CoreConfig) (*Core, error) {
 		logger:                       conf.Logger.Named("core"),
 		defaultLeaseTTL:              conf.DefaultLeaseTTL,
 		maxLeaseTTL:                  conf.MaxLeaseTTL,
+		cacheTTL:                     conf.CacheTTL,
 		cachingDisabled:              conf.DisableCache,
 		clusterName:                  conf.ClusterName,
 		clusterNetworkLayer:          conf.ClusterNetworkLayer,

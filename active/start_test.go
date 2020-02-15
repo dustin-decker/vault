@@ -12,8 +12,12 @@ func TestStart(t *testing.T) {
 		clusterSize int
 	}{
 		{
+			name:        "single node",
+			clusterSize: 1,
+		},
+		{
 			name:        "active-active HA cluster",
-			clusterSize: ClusterSize,
+			clusterSize: 3,
 		},
 	}
 	for _, tt := range tests {
