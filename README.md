@@ -11,8 +11,8 @@ As [conformance tests](https://github.com/dustin-decker/vault/tree/active-active
 ```
 - [x] create + lookup + renew + lookup + revoke + lookup child service tokens
 - [ ] create + lookup + revoke + lookup batch tokens
-- [ ] create + lookup + update + lookup + delete + lookup roles
-- [ ] create + lookup + update + lookup + delete + lookup policies
+- [ ] create + read + update + read + delete + read roles
+- [x] create + read + update + read + delete + read policies
 - [ ] create + lookup + update + lookup + delete + lookup mounts
 - [ ] create leases + expire + lease tidy API
 - [ ] create + revoke GCP secret

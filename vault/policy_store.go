@@ -10,6 +10,7 @@ import (
 
 	metrics "github.com/armon/go-metrics"
 	lru "github.com/dustin-decker/golang-lru"
+	"github.com/dustin-decker/golang-lru/simplelru"
 	"github.com/hashicorp/errwrap"
 	log "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/helper/identity"
@@ -176,8 +177,8 @@ type PolicyStore struct {
 	rgpView *BarrierView
 	egpView *BarrierView
 
-	tokenPoliciesLRU *lru.TwoQueueCache
-	egpLRU           *lru.TwoQueueCache
+	tokenPoliciesLRU simplelru.LRUCache
+	egpLRU           simplelru.LRUCache
 
 	// This is used to ensure that writes to the store (acl/rgp) or to the egp
 	// path tree don't happen concurrently. We are okay reading stale data so
@@ -216,9 +217,9 @@ func NewPolicyStore(ctx context.Context, core *Core, baseView *BarrierView, syst
 	ps.extraInit()
 
 	if !system.CachingDisabled() {
-		cache, _ := lru.New2Q(policyCacheSize)
+		cache, _ := lru.NewTTL(policyCacheSize, core.cacheTTL)
 		ps.tokenPoliciesLRU = cache
-		cache, _ = lru.New2Q(policyCacheSize)
+		cache, _ = lru.NewTTL(policyCacheSize, core.cacheTTL)
 		ps.egpLRU = cache
 	}
 
@@ -456,7 +457,7 @@ func (ps *PolicyStore) switchedGetPolicy(ctx context.Context, name string, polic
 	name = ps.sanitizeName(name)
 	index := ps.cacheKey(ns, name)
 
-	var cache *lru.TwoQueueCache
+	var cache simplelru.LRUCache
 	var view *BarrierView
 
 	switch policyType {
