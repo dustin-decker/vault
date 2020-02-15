@@ -7,9 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Add all of the tests you want to run under test.
         test:
           - TestGetTestCluster
           - TestServiceTokens
+          - TestPolicies
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-go@v2-beta
@@ -21,7 +23,7 @@ jobs:
           go test -timeout 5m github.com/hashicorp/vault/active -race -run "^(${TEST})$"
         env:
           GOFLAGS: "-mod=vendor"
-          # race detector requires CGO_ENABLED=1 :[
+          # Race detector requires CGO_ENABLED=1 :[
           CGO_ENABLED: "1"
           TEST: ${{ matrix.test }}
           NUM_SERVERS: "3"
