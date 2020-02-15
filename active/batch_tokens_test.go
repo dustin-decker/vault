@@ -71,22 +71,29 @@ func TestBatchTokens(t *testing.T) {
 			}
 
 			// create short lived batch token
-			client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
-			secret, err := client.Auth().Token().Create(&api.TokenCreateRequest{
-				DisplayName: "token",
-				TTL:         "1s",
-				Policies:    []string{"some-policy"},
-				Type:        "batch",
-			})
-			if err != nil {
-				t.Fatal(err)
+			secrets = []*api.Secret{}
+			for i := 0; i < tt.tokens; i++ {
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
+				secret, err := client.Auth().Token().Create(&api.TokenCreateRequest{
+					DisplayName: "token",
+					TTL:         "1s",
+					Policies:    []string{"some-policy"},
+					Type:        "batch",
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				secrets = append(secrets, secret)
 			}
 			// sleep to wait for expiration
-			time.Sleep(time.Second * 2)
-			// expect token to be expired
-			_, err = client.Auth().Token().Lookup(secret.Auth.ClientToken)
-			if err == nil {
-				t.Fatal("expected token lookup on expired batch token to fail")
+			time.Sleep(time.Millisecond * 1100)
+			for _, secret := range secrets {
+				// expect token to be expired
+				client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
+				_, err := client.Auth().Token().Lookup(secret.Auth.ClientToken)
+				if err == nil {
+					t.Fatal("expected token lookup on expired batch token to fail")
+				}
 			}
 		})
 	}
