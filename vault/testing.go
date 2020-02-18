@@ -829,6 +829,25 @@ func (c *TestCluster) Start() {
 	if c.SetupFunc != nil {
 		c.SetupFunc()
 	}
+
+	// Continuously check for new mounts
+	// for _, core := range c.Cores {
+	// 	go func() {
+	// 		ctx := context.Background()
+	// 		for {
+	// 			time.Sleep(5 * time.Second)
+	// 			core.logger.Info("reloading mounts")
+	// 			err := core.LoadMounts(ctx)
+	// 			if err != nil {
+	// 				core.logger.Error("failed to load mounts", err)
+	// 			}
+	// 			err = core.SetupMounts(ctx)
+	// 			if err != nil {
+	// 				core.logger.Error("failed to setup mounts", err)
+	// 			}
+	// 		}
+	// 	}()
+	// }
 }
 
 // UnsealCores uses the cluster barrier keys to unseal the test cluster cores
