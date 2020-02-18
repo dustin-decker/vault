@@ -1849,13 +1849,13 @@ func (s standardUnsealStrategy) unseal(ctx context.Context, logger log.Logger, c
 	if err := c.setupPluginCatalog(ctx); err != nil {
 		return err
 	}
-	if err := c.loadMounts(ctx); err != nil {
+	if err := c.LoadMounts(ctx); err != nil {
 		return err
 	}
 	if err := enterpriseSetupFilteredPaths(c); err != nil {
 		return err
 	}
-	if err := c.setupMounts(ctx); err != nil {
+	if err := c.SetupMounts(ctx); err != nil {
 		return err
 	}
 	if err := c.setupPolicyStore(ctx); err != nil {

@@ -5,8 +5,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/vault/builtin/logical/pki"
 	"github.com/hashicorp/vault/command/server"
 	vaulthttp "github.com/hashicorp/vault/http"
+	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/hashicorp/vault/vault"
 	testing "github.com/mitchellh/go-testing-interface"
 
@@ -44,7 +46,6 @@ func GetEnvInt(key string, fallback int) int {
 }
 
 func GetTestCluster(t testing.T, cluserSize int) *vault.TestCluster {
-	// Use a new database for each run
 	StorageConf["database"] = time.Now().String()
 	phys, err := physMySQL.NewMySQLBackend(StorageConf, nil)
 	if err != nil {
@@ -62,6 +63,9 @@ func GetTestCluster(t testing.T, cluserSize int) *vault.TestCluster {
 			},
 		},
 		Physical: phys,
+		LogicalBackends: map[string]logical.Factory{
+			"pki": pki.Factory,
+		},
 	}
 	return vault.NewTestCluster(t, coreConfig, &vault.TestClusterOptions{
 		NumCores:    cluserSize,
