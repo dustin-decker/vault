@@ -11,12 +11,12 @@ As [conformance tests](https://github.com/dustin-decker/vault/tree/active-active
 ```
 - [x] create + lookup + renew + lookup + revoke + lookup child service tokens
 - [x] create + lookup + create + expire + lookup batch tokens
-- [ ] create + read + update + read + delete + read roles
+- [x] create + read + update + read + delete + read roles
 - [x] create + read + update + read + delete + read policies
+- [x] create + read + update + read + mounts
 - [x] PKI mount create, generate, expire, tidy, remount
-- [ ] create leases + expire + lease tidy API
-- [ ] create + revoke GCP secret
-- [ ] create + timeout callback on GCP secret
+- [x] create leases + expire + lease tidy API
+- [x] create + tidy GCP service account secret
 ```
 
 ### Test Harness

@@ -114,7 +114,7 @@ func (w withHTTPClient) Apply(o *internal.DialSettings) {
 }
 
 // WithGRPCConn returns a ClientOption that specifies the gRPC client
-// connection to use as the basis of communications. This option many only be
+// connection to use as the basis of communications. This option may only be
 // used with services that support gRPC as their communication transport. When
 // used, the WithGRPCConn option takes precedent over all other supplied
 // options.
@@ -150,8 +150,7 @@ func WithGRPCConnectionPool(size int) ClientOption {
 type withGRPCConnectionPool int
 
 func (w withGRPCConnectionPool) Apply(o *internal.DialSettings) {
-	balancer := grpc.RoundRobin(internal.NewPoolResolver(int(w), o))
-	o.GRPCDialOpts = append(o.GRPCDialOpts, grpc.WithBalancer(balancer))
+	o.GRPCConnPoolSize = int(w)
 }
 
 // WithAPIKey returns a ClientOption that specifies an API key to be used

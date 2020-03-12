@@ -14,6 +14,7 @@ jobs:
           - TestBatchTokens
           - TestPolicies
           - TestPKIMount
+          - TestGCPSecrets
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-go@v2-beta
@@ -22,6 +23,7 @@ jobs:
       # A fresh mysql instance is already running :]
       # Tests run much slower with the race detector.
       - run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_DATA" > /tmp/gac
           go test -timeout 5m github.com/hashicorp/vault/active -race -run "^(${TEST})$"
         env:
           GOFLAGS: "-mod=vendor"
@@ -29,3 +31,6 @@ jobs:
           CGO_ENABLED: "1"
           TEST: ${{ matrix.test }}
           NUM_SERVERS: "3"
+          GCP_PROJECT: "vault-aa"
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/gac
+          GOOGLE_APPLICATION_CREDENTIALS_DATA: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
