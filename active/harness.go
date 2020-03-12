@@ -5,7 +5,12 @@ import (
 	"strconv"
 	"time"
 
+	gcpsecrets "github.com/hashicorp/vault-plugin-secrets-gcp/plugin"
+	kv "github.com/hashicorp/vault-plugin-secrets-kv"
 	"github.com/hashicorp/vault/builtin/logical/pki"
+	"github.com/hashicorp/vault/builtin/logical/ssh"
+	"github.com/hashicorp/vault/builtin/logical/transit"
+	bplugin "github.com/hashicorp/vault/builtin/plugin"
 	"github.com/hashicorp/vault/command/server"
 	vaulthttp "github.com/hashicorp/vault/http"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -64,7 +69,12 @@ func GetTestCluster(t testing.T, cluserSize int) *vault.TestCluster {
 		},
 		Physical: phys,
 		LogicalBackends: map[string]logical.Factory{
-			"pki": pki.Factory,
+			"gcp":     gcpsecrets.Factory,
+			"pki":     pki.Factory,
+			"kv":      kv.Factory,
+			"transit": transit.Factory,
+			"ssh":     ssh.Factory,
+			"plugin":  bplugin.Factory,
 		},
 	}
 	return vault.NewTestCluster(t, coreConfig, &vault.TestClusterOptions{
