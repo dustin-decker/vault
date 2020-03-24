@@ -40,7 +40,6 @@ require (
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/fatih/color v1.9.0
 	github.com/fatih/structs v1.1.0
-	github.com/fiatjaf/jiq v0.0.0-20200316171719-87cc65ef7025 // indirect
 	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-errors/errors v1.0.1
@@ -97,7 +96,7 @@ require (
 	github.com/hashicorp/vault-plugin-secrets-mongodbatlas v0.1.0-beta1
 	github.com/hashicorp/vault-plugin-secrets-openldap v0.1.0-beta1
 	github.com/hashicorp/vault/api v1.0.5-0.20200215224050-f6547fa8e820
-	github.com/hashicorp/vault/sdk v0.1.14-0.20200220181328-627cbfe69505
+	github.com/hashicorp/vault/sdk v0.1.14-0.20200215224050-f6547fa8e820
 	github.com/influxdata/influxdb v0.0.0-20190411212539-d24b7ba8c4c4
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/jackc/pgx v3.3.0+incompatible // indirect
@@ -111,7 +110,6 @@ require (
 	github.com/kr/text v0.1.0
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-colorable v0.1.6
-	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/michaelklishin/rabbit-hole v0.0.0-20191008194146-93d9988f0cd5
 	github.com/mitchellh/cli v1.0.0
@@ -121,9 +119,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/mitchellh/reflectwalk v1.0.1
 	github.com/ncw/swift v1.0.47
-	github.com/nsf/termbox-go v0.0.0-20200204031403-4d2b513ad8be // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
-	github.com/nwidger/jsoncolor v0.3.0 // indirect
 	github.com/oklog/run v1.1.0
 	github.com/okta/okta-sdk-golang v1.0.1
 	github.com/oracle/oci-go-sdk v12.5.0+incompatible
@@ -142,8 +138,6 @@ require (
 	github.com/shirou/gopsutil v2.19.9+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
-	github.com/simeji/jid v0.7.6 // indirect
-	github.com/spf13/cobra v0.0.6 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/tidwall/pretty v1.0.0 // indirect

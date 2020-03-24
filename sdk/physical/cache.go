@@ -14,7 +14,7 @@ import (
 
 const (
 	// DefaultCacheTTL is used if no ttl is specified for NewCache
-	DefaultCacheTTL = time.Hour * 8
+	DefaultCacheTTL = time.Second * 5
 
 	// DefaultCacheSize is used if no cache size is specified for NewCache
 	DefaultCacheSize = 128 * 1024
