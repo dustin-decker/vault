@@ -30,15 +30,17 @@ require (
 	github.com/chrismalek/oktasdk-go v0.0.0-20181212195951-3430665dfaa0
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c
-	github.com/coreos/go-semver v0.2.0
+	github.com/coreos/go-semver v0.3.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20190412130859-3b1d194e553a
 	github.com/dnaeon/go-vcr v1.0.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/duosecurity/duo_api_golang v0.0.0-20190308151101-6c680f768e74
 	github.com/dustin-decker/golang-lru v0.5.5-0.20200214174043-7019a3d9f547
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/fatih/color v1.9.0
 	github.com/fatih/structs v1.1.0
+	github.com/fiatjaf/jiq v0.0.0-20200316171719-87cc65ef7025 // indirect
 	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-errors/errors v1.0.1
@@ -47,10 +49,13 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-test/deep v1.0.2
 	github.com/gocql/gocql v0.0.0-20190402132108-0e1d5de854df
-	github.com/gogo/protobuf v1.2.1
-	github.com/golang/protobuf v1.3.3
+	github.com/gogo/protobuf v1.3.1
+	github.com/golang/protobuf v1.3.5
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-metrics-stackdriver v0.0.0-20190816035513-b52628e82e2a
+	github.com/google/uuid v1.1.1 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
 	github.com/hashicorp/consul-template v0.22.0
 	github.com/hashicorp/consul/api v1.2.1-0.20200128105449-6681be918a6e
 	github.com/hashicorp/errwrap v1.0.0
@@ -101,11 +106,12 @@ require (
 	github.com/jefferai/jsonx v1.0.0
 	github.com/joyent/triton-go v0.0.0-20190112182421-51ffac552869
 	github.com/keybase/go-crypto v0.0.0-20190403132359-d65b6b94177f
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.1.0
 	github.com/kr/text v0.1.0
 	github.com/lib/pq v1.2.0
-	github.com/mattn/go-colorable v0.1.4
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-colorable v0.1.6
+	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/michaelklishin/rabbit-hole v0.0.0-20191008194146-93d9988f0cd5
 	github.com/mitchellh/cli v1.0.0
@@ -115,42 +121,51 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/mitchellh/reflectwalk v1.0.1
 	github.com/ncw/swift v1.0.47
+	github.com/nsf/termbox-go v0.0.0-20200204031403-4d2b513ad8be // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/nwidger/jsoncolor v0.3.0 // indirect
 	github.com/oklog/run v1.1.0
 	github.com/okta/okta-sdk-golang v1.0.1
 	github.com/oracle/oci-go-sdk v12.5.0+incompatible
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pierrec/lz4 v2.4.1+incompatible // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.1
 	github.com/pquerna/otp v1.2.1-0.20191009055518-468c2dd2b58d
-	github.com/prometheus/client_golang v1.4.0
+	github.com/prometheus/client_golang v1.5.1
 	github.com/prometheus/common v0.9.1
+	github.com/prometheus/procfs v0.0.10 // indirect
 	github.com/ryanuber/columnize v2.1.0+incompatible
 	github.com/ryanuber/go-glob v1.0.0
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec
 	github.com/shirou/gopsutil v2.19.9+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
+	github.com/simeji/jid v0.7.6 // indirect
+	github.com/spf13/cobra v0.0.6 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/tidwall/pretty v1.0.0 // indirect
+	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.etcd.io/bbolt v1.3.3
-	go.etcd.io/etcd v0.5.0-alpha.5.0.20191023171146-3cf2f69b5738
+	go.etcd.io/etcd v0.5.0-alpha.5.0.20200317144327-07a74d61cb6c
 	go.mongodb.org/mongo-driver v1.2.1
-	go.uber.org/atomic v1.4.0
-	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	go.uber.org/atomic v1.6.0
+	go.uber.org/zap v1.14.1 // indirect
+	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20200217220822-9197077df867 // indirect
+	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect
 	google.golang.org/api v0.17.0
-	google.golang.org/genproto v0.0.0-20200218151345-dad8c97a84f5 // indirect
-	google.golang.org/grpc v1.27.1
+	google.golang.org/genproto v0.0.0-20200317114155-1f3552e48f24 // indirect
+	google.golang.org/grpc v1.28.0
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/ory-am/dockertest.v3 v3.3.4
 	gopkg.in/square/go-jose.v2 v2.4.1
 	layeh.com/radius v0.0.0-20190322222518-890bc1058917
+	sigs.k8s.io/yaml v1.2.0 // indirect
 )
