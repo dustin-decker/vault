@@ -21,7 +21,8 @@ jobs:
       - uses: actions/setup-go@v2-beta
         with:
           go-version: '^1.13.8'
-      # A fresh mysql instance is already running :]
+      - run: |
+          sudo systemctl start mysql
       # Tests run much slower with the race detector.
       - run: |
           echo "$GOOGLE_APPLICATION_CREDENTIALS_DATA" > /tmp/gac
