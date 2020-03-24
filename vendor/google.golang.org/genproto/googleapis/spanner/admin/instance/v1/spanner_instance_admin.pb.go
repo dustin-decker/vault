@@ -295,14 +295,7 @@ type Instance struct {
 	// as the string:  name + "_" + value  would prove problematic if we were to
 	// allow "_" in a future release.
 	Labels map[string]string `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Output only. The endpoint URIs based on the instance config.
-	// For example, instances located in a specific cloud region (or multi region)
-	// such as nam3, would have a nam3 specific endpoint URI.
-	// This URI is to be used implictly by SDK clients, with fallback to default
-	// URI. These endpoints are intended to optimize the network routing between
-	// the client and the instance's serving resources.
-	// If multiple endpoints are present, client may establish connections using
-	// any of the given URIs.
+	// Deprecated. This field is not populated.
 	EndpointUris         []string `protobuf:"bytes,8,rep,name=endpoint_uris,json=endpointUris,proto3" json:"endpoint_uris,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -547,9 +540,9 @@ type GetInstanceRequest struct {
 	// Required. The name of the requested instance. Values are of the form
 	// `projects/<project>/instances/<instance>`.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// If field_mask is present, specifies the subset of [][Instance] fields that
+	// If field_mask is present, specifies the subset of [Instance][google.spanner.admin.instance.v1.Instance] fields that
 	// should be returned.
-	// If absent, all [][Instance] fields are returned.
+	// If absent, all [Instance][google.spanner.admin.instance.v1.Instance] fields are returned.
 	FieldMask            *field_mask.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
@@ -803,11 +796,11 @@ func (m *ListInstancesResponse) GetNextPageToken() string {
 // The request for [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance].
 type UpdateInstanceRequest struct {
 	// Required. The instance to update, which must always include the instance
-	// name.  Otherwise, only fields mentioned in [][google.spanner.admin.instance.v1.UpdateInstanceRequest.field_mask] need be included.
+	// name.  Otherwise, only fields mentioned in [field_mask][google.spanner.admin.instance.v1.UpdateInstanceRequest.field_mask] need be included.
 	Instance *Instance `protobuf:"bytes,1,opt,name=instance,proto3" json:"instance,omitempty"`
-	// Required. A mask specifying which fields in [][google.spanner.admin.instance.v1.UpdateInstanceRequest.instance] should be updated.
+	// Required. A mask specifying which fields in [Instance][google.spanner.admin.instance.v1.Instance] should be updated.
 	// The field mask must always be specified; this prevents any future fields in
-	// [][google.spanner.admin.instance.v1.Instance] from being erased accidentally by clients that do not know
+	// [Instance][google.spanner.admin.instance.v1.Instance] from being erased accidentally by clients that do not know
 	// about them.
 	FieldMask            *field_mask.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`

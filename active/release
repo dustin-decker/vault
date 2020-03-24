@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eu
+
+RELEASE="$1"
+
+git checkout master
+git pull upstream master
+git fetch upstream --tags
+git checkout active-active
+git rebase master
+git diff master active-active -- . ':(exclude)vendor/' ':(exclude)go.sum' ':(exclude)go.mod' ':(exclude)api/go.sum' ':(exclude)sdk/go.mod' > /tmp/vault-aa
+git checkout -b "$RELEASE"-aa
+git reset --hard "$RELEASE"
+git apply --3way /tmp/vault-aa
+go mod tidy
