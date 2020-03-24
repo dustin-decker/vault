@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-func TestSecrets(t *testing.T) {
+func TestKV(t *testing.T) {
 	type args struct {
 	}
 	tests := []struct {
