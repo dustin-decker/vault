@@ -29,12 +29,14 @@ func TestServiceTokens(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		cluster := GetTestCluster(t, tt.clusterSize)
+		if cluster == nil {
+			t.Fatal("failed to get test cluster (can it connect to storage?)")
+		}
+		cluster.Start()
+		defer cluster.Cleanup()
+
 		t.Run(tt.name, func(t *testing.T) {
-			cluster := GetTestCluster(t, tt.clusterSize)
-			if cluster == nil {
-				t.Fatal("failed to get test cluster (can it connect to storage?)")
-			}
-			cluster.Start()
 
 			var secrets = []*api.Secret{}
 
