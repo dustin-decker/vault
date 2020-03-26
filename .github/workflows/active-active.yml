@@ -16,8 +16,6 @@ jobs:
           - TestPKIMount
           - TestGCPSecrets
           - TestKV
-          - BenchmarkGCPSecrets
-          
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-go@v2-beta
@@ -34,6 +32,33 @@ jobs:
           # Race detector requires CGO_ENABLED=1 :[
           CGO_ENABLED: "1"
           TEST: ${{ matrix.test }}
+          NUM_SERVERS: "3"
+          GCP_PROJECT: "vault-aa"
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/gac
+          GOOGLE_APPLICATION_CREDENTIALS_DATA: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+  benchmarks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Add all of the tests you want to run under test.
+        benchmark:
+          - BenchmarkGCPSecrets
+          - BenchmarkKV
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-go@v2-beta
+        with:
+          go-version: '^1.13.8'
+      - run: |
+          sudo systemctl start mysql
+      - run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_DATA" > /tmp/gac
+          go test github.com/hashicorp/vault/active -run=XXX -benchmem -benchtime=30s -bench="^(${BENCHMARK})$"
+        env:
+          GOFLAGS: "-mod=vendor"
+          # Race detector requires CGO_ENABLED=1 :[
+          CGO_ENABLED: "1"
+          BENCHMARK: ${{ matrix.benchmark }}
           NUM_SERVERS: "3"
           GCP_PROJECT: "vault-aa"
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/gac

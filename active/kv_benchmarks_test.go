@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/vault/api"
 )
 
-func BenchmarkGCPSecrets(b *testing.B) {
+func BenchmarkKV(b *testing.B) {
 	type args struct {
 	}
 	tests := []struct {
@@ -37,10 +35,9 @@ func BenchmarkGCPSecrets(b *testing.B) {
 
 		client := cluster.Cores[rand.Intn(len(cluster.Cores))].Client
 
-		// Create GCP backend mount
-		// Uses GOOGLE_APPLICATION_CREDENTIALS by default
-		err := client.Sys().Mount("gcp", &api.MountInput{
-			Type: "gcp",
+		// Create secrets backend mount
+		err := client.Sys().Mount("kv", &api.MountInput{
+			Type: "kv",
 			Config: api.MountConfigInput{
 				DefaultLeaseTTL: "10s",
 				MaxLeaseTTL:     "24h",
@@ -56,39 +53,19 @@ func BenchmarkGCPSecrets(b *testing.B) {
 			core.SetupMounts(context.Background())
 		}
 
-		bindingTemplate := `
-resource "//cloudresourcemanager.googleapis.com/projects/%s" {
-	roles = [
-		"roles/storage.admin",
-	]
-}
-`
-		binding := strings.TrimSpace(fmt.Sprintf(bindingTemplate, GCPProject))
-
-		// Create short lived roleset
-		client = cluster.Cores[rand.Intn(len(cluster.Cores))].Client
-		_, err = client.Logical().Write("gcp/roleset/test-ttl", map[string]interface{}{
-			"secret_type":  "access_token",
-			"token_scopes": []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/cloud-platform"},
-			"project":      GCPProject,
-			"bindings":     binding,
-		})
-		if err != nil {
-			b.Fatal(err)
-		}
-
-		// Wait for roleset to be created
-		time.Sleep(time.Second * 5)
-
 		b.RunParallel(func(pb *testing.PB) {
+			i := 0
 			for pb.Next() {
 				client = cluster.Cores[rand.Intn(len(cluster.Cores))].Client
 
-				// Obtain credential from roleset
-				_, err := client.Logical().Read("gcp/token/test-ttl")
+				_, err := client.Logical().Write(fmt.Sprintf("kv/secret-%d", i),
+					map[string]interface{}{
+						"value": fmt.Sprintf("%d", i),
+					})
 				if err != nil {
 					b.Fatal(err)
 				}
+				i++
 			}
 		})
 	}
