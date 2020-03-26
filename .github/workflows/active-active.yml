@@ -16,6 +16,8 @@ jobs:
           - TestPKIMount
           - TestGCPSecrets
           - TestKV
+          - BenchmarkGCPSecrets
+          
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-go@v2-beta
