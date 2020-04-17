@@ -53,13 +53,13 @@ func NewTransport(ctx context.Context, base http.RoundTripper, opts ...option.Cl
 }
 
 func newTransport(ctx context.Context, base http.RoundTripper, settings *internal.DialSettings) (http.RoundTripper, error) {
-	paramTransport := &parameterTransport{
-		base:          base,
+	trans := base
+	trans = parameterTransport{
+		base:          trans,
 		userAgent:     settings.UserAgent,
 		quotaProject:  settings.QuotaProject,
 		requestReason: settings.RequestReason,
 	}
-	var trans http.RoundTripper = paramTransport
 	trans = addOCTransport(trans, settings)
 	switch {
 	case settings.NoAuth:
@@ -73,9 +73,6 @@ func newTransport(ctx context.Context, base http.RoundTripper, settings *interna
 		creds, err := internal.Creds(ctx, settings)
 		if err != nil {
 			return nil, err
-		}
-		if paramTransport.quotaProject == "" {
-			paramTransport.quotaProject = internal.QuotaProjectFromCreds(creds)
 		}
 		trans = &oauth2.Transport{
 			Base:   trans,
@@ -107,7 +104,7 @@ type parameterTransport struct {
 	base http.RoundTripper
 }
 
-func (t *parameterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t parameterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	rt := t.base
 	if rt == nil {
 		return nil, errors.New("transport: no Transport specified")
