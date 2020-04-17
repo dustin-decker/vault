@@ -142,7 +142,7 @@ func TestCore_Mount_Local(t *testing.T) {
 	}
 
 	// Both should set up successfully
-	err := c.setupMounts(namespace.RootContext(nil))
+	err := c.SetupMounts(namespace.RootContext(nil))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestCore_Mount_Local(t *testing.T) {
 	}
 
 	oldMounts := c.mounts
-	if err := c.loadMounts(context.Background()); err != nil {
+	if err := c.LoadMounts(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	compEntries := c.mounts.Entries[:0]
@@ -611,7 +611,7 @@ func testCore_MountTable_UpgradeToTyped_Common(
 	// It should load successfully and be upgraded and persisted
 	switch testType {
 	case "mounts":
-		err = c.loadMounts(context.Background())
+		err = c.LoadMounts(context.Background())
 		persistFunc = c.persistMounts
 		mt = c.mounts
 	case "credentials":
@@ -789,7 +789,7 @@ func TestCore_MountInitialize(t *testing.T) {
 			},
 		}
 
-		err := c.setupMounts(namespace.RootContext(nil))
+		err := c.SetupMounts(namespace.RootContext(nil))
 		if err != nil {
 			t.Fatal(err)
 		}

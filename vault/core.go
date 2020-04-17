@@ -327,6 +327,8 @@ type Core struct {
 	baseLogger log.Logger
 	logger     log.Logger
 
+	cacheTTL time.Duration
+
 	// cachingDisabled indicates whether caches are disabled
 	cachingDisabled bool
 	// Cache stores the actual cache; we always have this but may bypass it if
@@ -573,6 +575,7 @@ func (c *CoreConfig) Clone() *CoreConfig {
 		Logger:                    c.Logger,
 		DisableCache:              c.DisableCache,
 		DisableMlock:              c.DisableMlock,
+		CacheTTL:                  c.CacheTTL,
 		CacheSize:                 c.CacheSize,
 		StorageType:               c.StorageType,
 		RedirectAddr:              c.RedirectAddr,
@@ -1697,13 +1700,13 @@ func (s standardUnsealStrategy) unseal(ctx context.Context, logger log.Logger, c
 	if err := c.setupPluginCatalog(ctx); err != nil {
 		return err
 	}
-	if err := c.loadMounts(ctx); err != nil {
+	if err := c.LoadMounts(ctx); err != nil {
 		return err
 	}
 	if err := enterpriseSetupFilteredPaths(c); err != nil {
 		return err
 	}
-	if err := c.setupMounts(ctx); err != nil {
+	if err := c.SetupMounts(ctx); err != nil {
 		return err
 	}
 	if err := c.setupPolicyStore(ctx); err != nil {

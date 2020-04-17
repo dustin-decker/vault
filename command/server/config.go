@@ -31,13 +31,14 @@ type Config struct {
 	Seals   []*Seal  `hcl:"-"`
 	Entropy *Entropy `hcl:"-"`
 
-	CacheSize                int         `hcl:"cache_size"`
-	DisableCache             bool        `hcl:"-"`
-	DisableCacheRaw          interface{} `hcl:"disable_cache"`
-	DisableMlock             bool        `hcl:"-"`
-	DisableMlockRaw          interface{} `hcl:"disable_mlock"`
-	DisablePrintableCheck    bool        `hcl:"-"`
-	DisablePrintableCheckRaw interface{} `hcl:"disable_printable_check"`
+	CacheTTL                 time.Duration `hcl:"-"`
+	CacheSize                int           `hcl:"cache_size"`
+	DisableCache             bool          `hcl:"-"`
+	DisableCacheRaw          interface{}   `hcl:"disable_cache"`
+	DisableMlock             bool          `hcl:"-"`
+	DisableMlockRaw          interface{}   `hcl:"disable_mlock"`
+	DisablePrintableCheck    bool          `hcl:"-"`
+	DisablePrintableCheckRaw interface{}   `hcl:"disable_printable_check"`
 
 	EnableUI    bool        `hcl:"-"`
 	EnableUIRaw interface{} `hcl:"ui"`

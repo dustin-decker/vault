@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -eu
+
+RELEASE="$1"
+
+git checkout master
+git pull upstream master
+git fetch upstream --tags
+git checkout active-active
+git rebase master
+git diff --name-only --diff-filter=U | grep "go." | xargs git checkout --theirs --
+git rebase --continue
+git diff master active-active -- . ':(exclude)vendor/' ':(exclude)go.sum' ':(exclude)go.mod' ':(exclude)api/go.sum' ':(exclude)sdk/go.mod' > /tmp/vault-aa
+git checkout -b release-"$RELEASE"-aa
+git reset --hard "$RELEASE"
+git apply --3way /tmp/vault-aa
+rm go.sum
+go get github.com/dustin-decker/golang-lru@master
+go mod tidy
+go mod vendor
+git add :/
+git commit -m "release $RELEASE-aa"
+git push origin release-v1.4.0-aa
+git push --tag

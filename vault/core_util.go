@@ -28,9 +28,9 @@ func coreInit(c *Core, conf *CoreConfig) error {
 	cacheLogger := c.baseLogger.Named("storage.cache")
 	c.allLoggers = append(c.allLoggers, cacheLogger)
 	if txnOK {
-		c.physical = physical.NewTransactionalCache(c.sealUnwrapper, conf.CacheSize, cacheLogger)
+		c.physical = physical.NewTransactionalCache(c.sealUnwrapper, conf.CacheSize, conf.CacheTTL, cacheLogger)
 	} else {
-		c.physical = physical.NewCache(c.sealUnwrapper, conf.CacheSize, cacheLogger)
+		c.physical = physical.NewCache(c.sealUnwrapper, conf.CacheSize, conf.CacheTTL, cacheLogger)
 	}
 	c.physicalCache = c.physical.(physical.ToggleablePurgemonster)
 

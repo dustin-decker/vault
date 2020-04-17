@@ -1,0 +1,57 @@
+diff a/vault/testing.go b/vault/testing.go	(rejected hunks)
+@@ -1444,6 +1464,20 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
+ 		coreConfig.RawConfig = new(server.Config)
+ 	}
+ 
++	if base != nil {
++		if base.RawConfig != nil {
++			if base.RawConfig.DisableClustering {
++				coreConfig.RedirectAddr = ""
++				coreConfig.ClusterAddr = ""
++				coreConfig.HAPhysical = nil
++			}
++
++			if base.RawConfig.CacheTTL > 0 {
++				coreConfig.CacheTTL = base.RawConfig.CacheTTL
++			}
++		}
++	}
++
+ 	addAuditBackend := len(coreConfig.AuditBackends) == 0
+ 	if addAuditBackend {
+ 		AddNoopAudit(coreConfig, nil)
+@@ -1494,22 +1536,26 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
+ 				coreConfig.Physical = physBundle.Backend
+ 				localConfig.Physical = physBundle.Backend
+ 				base.Physical = physBundle.Backend
+-				haBackend := physBundle.HABackend
+-				if haBackend == nil {
+-					if ha, ok := physBundle.Backend.(physical.HABackend); ok {
+-						haBackend = ha
++				if !base.RawConfig.DisableClustering {
++					haBackend := physBundle.HABackend
++					if haBackend == nil {
++						if ha, ok := physBundle.Backend.(physical.HABackend); ok {
++							haBackend = ha
++						}
+ 					}
++					coreConfig.HAPhysical = haBackend
++					localConfig.HAPhysical = haBackend
+ 				}
+-				coreConfig.HAPhysical = haBackend
+-				localConfig.HAPhysical = haBackend
+ 				if physBundle.Cleanup != nil {
+ 					cleanupFuncs = append(cleanupFuncs, physBundle.Cleanup)
+ 				}
+ 			}
+ 		}
+ 
+-		if opts != nil && opts.ClusterLayers != nil {
+-			localConfig.ClusterNetworkLayer = opts.ClusterLayers.Layers()[i]
++		if !localConfig.RawConfig.DisableClustering {
++			if opts != nil && opts.ClusterLayers != nil {
++				localConfig.ClusterNetworkLayer = opts.ClusterLayers.Layers()[i]
++			}
+ 		}
+ 
+ 		switch {

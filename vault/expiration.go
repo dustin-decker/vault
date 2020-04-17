@@ -56,6 +56,7 @@ const (
 type pendingInfo struct {
 	exportLeaseTimes *leaseEntry
 	timer            *time.Timer
+	creationTime     time.Time
 }
 
 // ExpirationManager is used by the Core to manage leases. Secrets
@@ -70,6 +71,7 @@ type ExpirationManager struct {
 	tokenStore *TokenStore
 	logger     log.Logger
 
+	// This is a lease cache for used for expiration manager
 	pending     map[string]pendingInfo
 	pendingLock sync.RWMutex
 
@@ -164,7 +166,9 @@ func NewExpirationManager(c *Core, view *BarrierView, e ExpireLeaseStrategy, log
 		logLeaseExpirations: os.Getenv("VAULT_SKIP_LOGGING_LEASE_EXPIRATIONS") == "",
 		expireFunc:          e,
 	}
-	*exp.restoreMode = 1
+
+	// Don't start in restore mode, we we lazily load leases from storage
+	*exp.restoreMode = 0
 
 	if exp.logger == nil {
 		opts := log.LoggerOptions{Name: "expiration_manager"}
@@ -349,6 +353,7 @@ func (m *ExpirationManager) Tidy(ctx context.Context) error {
 		}
 	}
 
+	// TODO: Enumerate namespaces instead of using current
 	ns, err := namespace.FromContext(ctx)
 	if err != nil {
 		return err
@@ -1267,12 +1272,16 @@ func (m *ExpirationManager) FetchLeaseTimesByToken(ctx context.Context, te *logi
 func (m *ExpirationManager) FetchLeaseTimes(ctx context.Context, leaseID string) (*leaseEntry, error) {
 	defer metrics.MeasureSince([]string{"expire", "fetch-lease-times"}, time.Now())
 
+	// Check against pending lease cache
 	m.pendingLock.RLock()
 	val := m.pending[leaseID]
 	m.pendingLock.RUnlock()
 
 	if val.exportLeaseTimes != nil {
-		return val.exportLeaseTimes, nil
+		// Only return from pending lease cache if more recent than cacheTTL
+		if time.Since(val.creationTime) < m.core.cacheTTL {
+			return val.exportLeaseTimes, nil
+		}
 	}
 
 	// Load the entry
@@ -1342,6 +1351,8 @@ func (m *ExpirationManager) updatePendingInternal(le *leaseEntry, leaseTotal tim
 		})
 		pending = pendingInfo{
 			timer: timer,
+			// Add creation time to use for cacheTTL expiration
+			creationTime: time.Now(),
 		}
 	}
 
@@ -1500,6 +1511,7 @@ func (m *ExpirationManager) loadEntryInternal(ctx context.Context, leaseID strin
 		// Setup revocation timer
 		m.updatePending(le, le.ExpireTime.Sub(time.Now()))
 	}
+
 	return le, nil
 }
 

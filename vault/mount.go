@@ -466,10 +466,11 @@ func (c *Core) mountInternal(ctx context.Context, entry *MountEntry, updateStora
 		addFilterablePath(c, viewPath)
 	}
 
-	nilMount, err := preprocessMount(c, entry, view)
-	if err != nil {
-		return err
-	}
+	nilMount := false
+	// nilMount, err := preprocessMount(c, entry, view)
+	// if err != nil {
+	// 	return err
+	// }
 	origReadOnlyErr := view.getReadOnlyErr()
 
 	// Mark the view as read-only until the mounting is complete and
@@ -882,8 +883,8 @@ func (c *Core) remount(ctx context.Context, src, dst string, updateStorage bool)
 	return nil
 }
 
-// loadMounts is invoked as part of postUnseal to load the mount table
-func (c *Core) loadMounts(ctx context.Context) error {
+// LoadMounts is invoked as part of postUnseal to load the mount table
+func (c *Core) LoadMounts(ctx context.Context) error {
 	// Load the existing mount table
 	raw, err := c.barrier.Get(ctx, coreMountConfigPath)
 	if err != nil {
@@ -1096,9 +1097,9 @@ func (c *Core) persistMounts(ctx context.Context, table *MountTable, local *bool
 	return err
 }
 
-// setupMounts is invoked after we've loaded the mount table to
+// SetupMounts is invoked after we've loaded the mount table to
 // initialize the logical backends and setup the router
-func (c *Core) setupMounts(ctx context.Context) error {
+func (c *Core) SetupMounts(ctx context.Context) error {
 	c.mountsLock.Lock()
 	defer c.mountsLock.Unlock()
 
@@ -1116,28 +1117,30 @@ func (c *Core) setupMounts(ctx context.Context) error {
 		}
 
 		// Determining the replicated state of the mount
-		nilMount, err := preprocessMount(c, entry, view)
-		if err != nil {
-			return err
-		}
-		origReadOnlyErr := view.getReadOnlyErr()
+		// This change is not valid for DR clusters
+		nilMount := false
+		// nilMount, err := preprocessMount(c, entry, view)
+		// if err != nil {
+		// 	return err
+		// }
+		// origReadOnlyErr := view.getReadOnlyErr()
 
 		// Mark the view as read-only until the mounting is complete and
 		// ensure that it is reset after. This ensures that there will be no
 		// writes during the construction of the backend.
-		view.setReadOnlyErr(logical.ErrSetupReadOnly)
-		if strutil.StrListContains(singletonMounts, entry.Type) {
-			defer view.setReadOnlyErr(origReadOnlyErr)
-		} else {
-			c.postUnsealFuncs = append(c.postUnsealFuncs, func() {
-				view.setReadOnlyErr(origReadOnlyErr)
-			})
-		}
+		// view.setReadOnlyErr(logical.ErrSetupReadOnly)
+		// if strutil.StrListContains(singletonMounts, entry.Type) {
+		// 	defer view.setReadOnlyErr(origReadOnlyErr)
+		// } else {
+		// 	c.postUnsealFuncs = append(c.postUnsealFuncs, func() {
+		// 		view.setReadOnlyErr(origReadOnlyErr)
+		// 	})
+		// }
 
 		var backend logical.Backend
 		// Create the new backend
 		sysView := c.mountEntrySysView(entry)
-		backend, err = c.newLogicalBackend(ctx, entry, sysView, view)
+		backend, err := c.newLogicalBackend(ctx, entry, sysView, view)
 		if err != nil {
 			c.logger.Error("failed to create mount entry", "path", entry.Path, "error", err)
 			if !c.builtinRegistry.Contains(entry.Type, consts.PluginTypeSecrets) {
@@ -1180,8 +1183,10 @@ func (c *Core) setupMounts(ctx context.Context) error {
 		// Mount the backend
 		err = c.router.Mount(backend, entry.Path, entry, view)
 		if err != nil {
-			c.logger.Error("failed to mount entry", "path", entry.Path, "error", err)
-			return errLoadMountsFailed
+			if !strings.Contains(err.Error(), "cannot mount under existing mount") {
+				c.logger.Error("failed to mount entry", "path", entry.Path, "error", err)
+				return errLoadMountsFailed
+			}
 		}
 
 		// Initialize

@@ -66,7 +66,7 @@ func TestRequestHandling_Wrapping(t *testing.T) {
 func TestRequestHandling_LoginWrapping(t *testing.T) {
 	core, _, root := TestCoreUnsealed(t)
 
-	if err := core.loadMounts(namespace.RootContext(nil)); err != nil {
+	if err := core.LoadMounts(namespace.RootContext(nil)); err != nil {
 		t.Fatalf("err: %v", err)
 	}
 
