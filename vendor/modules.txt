@@ -220,6 +220,9 @@ github.com/dsnet/compress/internal/prefix
 # github.com/duosecurity/duo_api_golang v0.0.0-20190308151101-6c680f768e74
 github.com/duosecurity/duo_api_golang
 github.com/duosecurity/duo_api_golang/authapi
+# github.com/dustin-decker/golang-lru v0.0.0-20200214174043-7019a3d9f547
+github.com/dustin-decker/golang-lru
+github.com/dustin-decker/golang-lru/simplelru
 # github.com/elazarl/go-bindata-assetfs v1.0.0
 github.com/elazarl/go-bindata-assetfs
 # github.com/fatih/color v1.7.0
@@ -354,7 +357,6 @@ github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v1.2.0
 github.com/hashicorp/go-version
 # github.com/hashicorp/golang-lru v0.5.3
-github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl

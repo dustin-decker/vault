@@ -829,6 +829,25 @@ func (c *TestCluster) Start() {
 	if c.SetupFunc != nil {
 		c.SetupFunc()
 	}
+
+	// Continuously check for new mounts
+	// for _, core := range c.Cores {
+	// 	go func() {
+	// 		ctx := context.Background()
+	// 		for {
+	// 			time.Sleep(5 * time.Second)
+	// 			core.logger.Info("reloading mounts")
+	// 			err := core.LoadMounts(ctx)
+	// 			if err != nil {
+	// 				core.logger.Error("failed to load mounts", err)
+	// 			}
+	// 			err = core.SetupMounts(ctx)
+	// 			if err != nil {
+	// 				core.logger.Error("failed to setup mounts", err)
+	// 			}
+	// 		}
+	// 	}()
+	// }
 }
 
 // UnsealCores uses the cluster barrier keys to unseal the test cluster cores
@@ -1375,6 +1394,7 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 		coreConfig.EnableUI = base.EnableUI
 		coreConfig.DefaultLeaseTTL = base.DefaultLeaseTTL
 		coreConfig.MaxLeaseTTL = base.MaxLeaseTTL
+		coreConfig.CacheTTL = base.CacheTTL
 		coreConfig.CacheSize = base.CacheSize
 		coreConfig.PluginDirectory = base.PluginDirectory
 		coreConfig.Seal = base.Seal
@@ -1444,6 +1464,20 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 		coreConfig.RawConfig = new(server.Config)
 	}
 
+	if base != nil {
+		if base.RawConfig != nil {
+			if base.RawConfig.DisableClustering {
+				coreConfig.RedirectAddr = ""
+				coreConfig.ClusterAddr = ""
+				coreConfig.HAPhysical = nil
+			}
+
+			if base.RawConfig.CacheTTL > 0 {
+				coreConfig.CacheTTL = base.RawConfig.CacheTTL
+			}
+		}
+	}
+
 	addAuditBackend := len(coreConfig.AuditBackends) == 0
 	if addAuditBackend {
 		AddNoopAudit(coreConfig, nil)
@@ -1463,6 +1497,12 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 		coreConfig.HAPhysical = haPhys.(physical.HABackend)
 	}
 
+	if base != nil && base.RawConfig != nil {
+		if base.RawConfig.DisableClustering {
+			coreConfig.HAPhysical = nil
+		}
+	}
+
 	pubKey, priKey, err := testGenerateCoreKeys()
 	if err != nil {
 		t.Fatalf("err: %v", err)
@@ -1473,7 +1513,9 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 	coreConfigs := []*CoreConfig{}
 	for i := 0; i < numCores; i++ {
 		localConfig := *coreConfig
-		localConfig.RedirectAddr = fmt.Sprintf("https://127.0.0.1:%d", listeners[i][0].Address.Port)
+		if !localConfig.RawConfig.DisableClustering {
+			localConfig.RedirectAddr = fmt.Sprintf("https://127.0.0.1:%d", listeners[i][0].Address.Port)
+		}
 
 		// if opts.SealFunc is provided, use that to generate a seal for the config instead
 		if opts != nil && opts.SealFunc != nil {
@@ -1494,22 +1536,26 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 				coreConfig.Physical = physBundle.Backend
 				localConfig.Physical = physBundle.Backend
 				base.Physical = physBundle.Backend
-				haBackend := physBundle.HABackend
-				if haBackend == nil {
-					if ha, ok := physBundle.Backend.(physical.HABackend); ok {
-						haBackend = ha
+				if !base.RawConfig.DisableClustering {
+					haBackend := physBundle.HABackend
+					if haBackend == nil {
+						if ha, ok := physBundle.Backend.(physical.HABackend); ok {
+							haBackend = ha
+						}
 					}
+					coreConfig.HAPhysical = haBackend
+					localConfig.HAPhysical = haBackend
 				}
-				coreConfig.HAPhysical = haBackend
-				localConfig.HAPhysical = haBackend
 				if physBundle.Cleanup != nil {
 					cleanupFuncs = append(cleanupFuncs, physBundle.Cleanup)
 				}
 			}
 		}
 
-		if opts != nil && opts.ClusterLayers != nil {
-			localConfig.ClusterNetworkLayer = opts.ClusterLayers.Layers()[i]
+		if !localConfig.RawConfig.DisableClustering {
+			if opts != nil && opts.ClusterLayers != nil {
+				localConfig.ClusterNetworkLayer = opts.ClusterLayers.Layers()[i]
+			}
 		}
 
 		switch {
@@ -1680,13 +1726,20 @@ func NewTestCluster(t testing.T, base *CoreConfig, opts *TestClusterOptions) *Te
 
 			// Ensure cluster connection info is populated.
 			// Other cores should not come up as leaders.
-			for i := 1; i < numCores; i++ {
-				isLeader, _, _, err := cores[i].Leader()
-				if err != nil {
-					t.Fatal(err)
-				}
-				if isLeader {
-					t.Fatalf("core[%d] should not be leader", i)
+			enableLeaderCheck := true
+			if base != nil && base.RawConfig != nil && base.RawConfig.DisableClustering {
+				enableLeaderCheck = false
+			}
+
+			if enableLeaderCheck {
+				for i := 1; i < numCores; i++ {
+					isLeader, _, _, err := cores[i].Leader()
+					if err != nil {
+						t.Fatal(err)
+					}
+					if isLeader {
+						t.Fatalf("core[%d] should not be leader", i)
+					}
 				}
 			}
 		}

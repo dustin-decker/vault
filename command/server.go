@@ -785,9 +785,9 @@ func (c *ServerCommand) Run(args []string) int {
 	}
 
 	// Automatically enable dev mode if other dev flags are provided.
-	if c.flagDevConsul || c.flagDevHA || c.flagDevTransactional || c.flagDevLeasedKV || c.flagDevThreeNode || c.flagDevFourCluster || c.flagDevAutoSeal || c.flagDevKVV1 {
-		c.flagDev = true
-	}
+	// if c.flagDevConsul || c.flagDevHA || c.flagDevTransactional || c.flagDevLeasedKV || c.flagDevThreeNode || c.flagDevFourCluster || c.flagDevAutoSeal || c.flagDevKVV1 {
+	// 	c.flagDev = true
+	// }
 
 	// Validation
 	if !c.flagDev {
@@ -796,10 +796,10 @@ func (c *ServerCommand) Run(args []string) int {
 			c.UI.Error("Must specify at least one config path using -config")
 			return 1
 		case c.flagDevRootTokenID != "":
-			c.UI.Warn(wrapAtLength(
-				"You cannot specify a custom root token ID outside of \"dev\" mode. " +
-					"Your request has been ignored."))
-			c.flagDevRootTokenID = ""
+			// c.UI.Warn(wrapAtLength(
+			// 	"You cannot specify a custom root token ID outside of \"dev\" mode. " +
+			// 		"Your request has been ignored."))
+			// c.flagDevRootTokenID = ""
 		}
 	}
 
@@ -1100,6 +1100,7 @@ func (c *ServerCommand) Run(args []string) int {
 		MaxLeaseTTL:               config.MaxLeaseTTL,
 		DefaultLeaseTTL:           config.DefaultLeaseTTL,
 		ClusterName:               config.ClusterName,
+		CacheTTL:                  config.CacheTTL,
 		CacheSize:                 config.CacheSize,
 		PluginDirectory:           config.PluginDirectory,
 		EnableUI:                  config.EnableUI,

@@ -1,4 +1,29 @@
-# Vault [![CircleCI](https://circleci.com/gh/hashicorp/vault.svg?style=svg)](https://circleci.com/gh/hashicorp/vault) [![Join the chat at https://gitter.im/hashicorp-vault/Lobby](https://badges.gitter.im/hashicorp-vault/Lobby.svg)](https://gitter.im/hashicorp-vault/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![vault enterprise](https://img.shields.io/badge/vault-enterprise-yellow.svg?colorB=7c8797&colorA=000000)](https://www.hashicorp.com/products/vault/?utm_source=github&utm_medium=banner&utm_campaign=github-vault-enterprise)
+# Vault active-active HA
+
+This is a fork of Vault altered to run in an active-active HA configuration. This means that all of the Vault replicas server reads+writes, and can be horizontally scaled and redeployed with zero downtime.
+
+It is a work in progress.
+
+## Conformance Tests
+
+As [conformance tests](https://github.com/dustin-decker/vault/tree/active-active/active) are written, active-active functionality is added and verified. You can see the conformance tests run in [GitHub actions](https://github.com/dustin-decker/vault/actions).
+
+```
+- [x] create + lookup + renew + lookup + revoke + lookup child service tokens
+- [x] create + lookup + create + expire + lookup batch tokens
+- [x] create + read + update + read + delete + read roles
+- [x] create + read + update + read + delete + read policies
+- [x] create + read + update + read + mounts
+- [x] PKI mount create, generate, expire, tidy, remount
+- [x] create leases + expire + lease tidy API
+- [x] create + tidy GCP service account secret
+```
+
+### Test Harness
+
+The test harness depends on a running MySQL database (see the [storage configuration](https://github.com/dustin-decker/vault/blob/active-active/active/harness.go) for details). It will spawn the configured number of Vault servers in active-active configuration natively in goroutines, so whenever you run the tests, you are testing the in-tree Vault server code.
+
+# About Vault
 
 ----
 

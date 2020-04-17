@@ -358,6 +358,8 @@ type Core struct {
 	baseLogger log.Logger
 	logger     log.Logger
 
+	cacheTTL time.Duration
+
 	// cachingDisabled indicates whether caches are disabled
 	cachingDisabled bool
 	// Cache stores the actual cache; we always have this but may bypass it if
@@ -554,6 +556,9 @@ type CoreConfig struct {
 	// Disables mlock syscall
 	DisableMlock bool
 
+	// Custom TTL for the LRU caches, or zero for default
+	CacheTTL time.Duration
+
 	// Custom cache size for the LRU cache on the physical backend, or zero for default
 	CacheSize int
 
@@ -619,6 +624,7 @@ func (c *CoreConfig) Clone() *CoreConfig {
 		Logger:                    c.Logger,
 		DisableCache:              c.DisableCache,
 		DisableMlock:              c.DisableMlock,
+		CacheTTL:                  c.CacheTTL,
 		CacheSize:                 c.CacheSize,
 		StorageType:               c.StorageType,
 		RedirectAddr:              c.RedirectAddr,
@@ -734,6 +740,7 @@ func NewCore(conf *CoreConfig) (*Core, error) {
 		logger:                       conf.Logger.Named("core"),
 		defaultLeaseTTL:              conf.DefaultLeaseTTL,
 		maxLeaseTTL:                  conf.MaxLeaseTTL,
+		cacheTTL:                     conf.CacheTTL,
 		cachingDisabled:              conf.DisableCache,
 		clusterName:                  conf.ClusterName,
 		clusterNetworkLayer:          conf.ClusterNetworkLayer,
@@ -1842,13 +1849,13 @@ func (s standardUnsealStrategy) unseal(ctx context.Context, logger log.Logger, c
 	if err := c.setupPluginCatalog(ctx); err != nil {
 		return err
 	}
-	if err := c.loadMounts(ctx); err != nil {
+	if err := c.LoadMounts(ctx); err != nil {
 		return err
 	}
 	if err := enterpriseSetupFilteredPaths(c); err != nil {
 		return err
 	}
-	if err := c.setupMounts(ctx); err != nil {
+	if err := c.SetupMounts(ctx); err != nil {
 		return err
 	}
 	if err := c.setupPolicyStore(ctx); err != nil {
